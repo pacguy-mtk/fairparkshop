@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070912">
+  <title>Shoplot Follow-up Desk</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #070912;
+      --panel: rgba(13, 17, 31, 0.92);
+      --panel-strong: #11162a;
+      --text: #f4f7ff;
+      --muted: #aab5ce;
+      --faint: #707b95;
+      --line: rgba(255,255,255,.12);
+      --cyan: #42e8d4;
+      --gold: #f8c76c;
+      --super-gold: #ffe66d;
+      --green: #69f0ae;
+      --red: #ff6f91;
+      --blue: #7aa7ff;
+      --shadow: 0 24px 70px rgba(0,0,0,.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(66,232,212,.14), transparent 28rem),
+        radial-gradient(circle at 88% 10%, rgba(122,167,255,.13), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell {
+      width: min(1280px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 26px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--cyan), var(--gold));
+      color: #050813;
+      font-weight: 900;
+      box-shadow: 0 10px 28px rgba(66,232,212,.18);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn, .small-btn {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255,255,255,.05);
+      transition: transform .15s ease, border-color .15s ease, background .15s ease, filter .15s ease;
+    }
+    .btn {
+      min-height: 42px;
+      border-radius: 12px;
+      padding: 0 14px;
+      font-weight: 850;
+    }
+    .btn.primary { background: rgba(66,232,212,.14); border-color: rgba(66,232,212,.38); color: var(--cyan); }
+    .btn.warn { background: rgba(248,199,108,.14); border-color: rgba(248,199,108,.34); color: var(--gold); }
+    .btn.danger { background: rgba(255,111,145,.12); border-color: rgba(255,111,145,.28); color: var(--red); }
+    .btn.soft { background: rgba(122,167,255,.12); border-color: rgba(122,167,255,.28); color: var(--blue); }
+    .btn:hover, .small-btn:hover { filter: brightness(1.05); }
+    .btn:active, .small-btn:active { transform: translateY(1px); }
+
+    .small-btn {
+      min-height: 30px;
+      border-radius: 9px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+      padding: 6px;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .tab-btn, .mode-btn {
+      min-height: 42px;
+      border: 0;
+      border-radius: 10px;
+      padding: 0 18px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .tab-btn.active, .mode-btn.active { background: rgba(66,232,212,.14); color: var(--cyan); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .grid { display: grid; gap: 14px; }
+    .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 14px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .metric {
+      min-height: 96px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--cyan);
+      opacity: .95;
+    }
+    .metric:nth-child(2)::before { background: var(--gold); }
+    .metric:nth-child(3)::before { background: var(--green); }
+    .metric:nth-child(4)::before { background: var(--blue); }
+    .metric.progress-led {
+      position: relative;
+      isolation: isolate;
+    }
+    .metric.progress-led.active {
+      --led: var(--gold);
+      border-color: color-mix(in srgb, var(--lead, var(--gold)) 35%, transparent);
+      animation: followLedPanel 2.4s ease-in-out infinite;
+    }
+    .metric.progress-led.active::after {
+      content: "";
+      position: absolute;
+      inset: -42%;
+      z-index: 0;
+      background: conic-gradient(from 0deg, transparent 0deg, transparent 286deg, var(--led) 308deg, color-mix(in srgb, var(--led) 42%, transparent) 326deg, transparent 344deg, transparent 360deg);
+      opacity: .86;
+      animation: followLedOrbit 3.2s linear infinite;
+    }
+    .metric.progress-led .led-mask {
+      display: none;
+    }
+    .metric.progress-led.active .led-mask {
+      display: block;
+      position: absolute;
+      inset: 1px;
+      z-index: 1;
+      border-radius: 15px;
+      background: var(--panel);
+      pointer-events: none;
+    }
+    .metric.progress-led.active span,
+    .metric.progress-led.active strong {
+      position: relative;
+      z-index: 2;
+    }
+    .metric.progress-led.active::before {
+      background: var(--led);
+      z-index: 3;
+      animation: followLedStrip 1.8s ease-in-out infinite;
+    }
+    .metric.progress-led.active strong {
+      text-shadow: 0 0 16px color-mix(in srgb, var(--led) 32%, transparent);
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 10px;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height: 1;
+    }
+
+    .mission {
+      position: relative;
+      margin-bottom: 14px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      overflow: hidden;
+    }
+    .mission::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(66,232,212,.12), transparent 50%, rgba(248,199,108,.08));
+      pointer-events: none;
+    }
+    .mission > * { position: relative; }
+    .mission h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1;
+    }
+    .mission p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .mission-action {
+      min-width: 210px;
+      border: 1px solid rgba(248,199,108,.3);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: right;
+      background: rgba(248,199,108,.08);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, filter .18s ease;
+      position: relative;
+      isolation: isolate;
+    }
+    .mission-action:hover, .mission-action:focus-visible {
+      border-color: rgba(248,199,108,.72);
+      box-shadow: 0 0 22px rgba(248,199,108,.16);
+      outline: none;
+      transform: translateY(-1px);
+    }
+    .mission-action span {
+      display: block;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .mission-action strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+    }
+
+    .panel-head { padding: 16px 16px 0; }
+    .panel-head h2 { margin: 0; font-size: 20px; }
+    .panel-head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .panel-body { padding: 16px; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    input, select, textarea {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0 12px;
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      outline: none;
+    }
+    textarea {
+      min-height: 72px;
+      padding-top: 10px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(66,232,212,.62);
+      box-shadow: 0 0 0 3px rgba(66,232,212,.08);
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 430px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .stack { display: grid; gap: 10px; }
+    .template-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .template-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      display: grid;
+      gap: 10px;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .template-card h3 { margin: 0; font-size: 16px; }
+    .template-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .copy-box {
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 13px;
+      overflow: auto;
+    }
+
+    .lead-tools {
+      display: grid;
+      gap: 10px;
+    }
+
+    .lead-list {
+      overflow: auto;
+      max-height: calc(100vh - 320px);
+      scrollbar-color: var(--cyan) rgba(255,255,255,.08);
+      scrollbar-width: thin;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 1100px;
+    }
+    th, td {
+      padding: 12px 13px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: #101525;
+    }
+    tbody tr {
+      transition: background .16s ease, box-shadow .16s ease;
+    }
+    tbody tr:hover {
+      background: rgba(66,232,212,.045);
+      box-shadow: inset 3px 0 0 rgba(66,232,212,.34);
+    }
+    tr.active-row td { background: rgba(248,199,108,.08); }
+    tr.active-row td:first-child {
+      box-shadow: inset 4px 0 0 rgba(248,199,108,.95), inset 0 1px 0 rgba(248,199,108,.22), inset 0 -1px 0 rgba(248,199,108,.22);
+    }
+    tr.phase-ask { box-shadow: inset 3px 0 0 rgba(248,199,108,.56); }
+    tr.phase-verify { box-shadow: inset 3px 0 0 rgba(122,167,255,.56); }
+    tr.phase-schedule { box-shadow: inset 3px 0 0 rgba(66,232,212,.56); }
+    tr.phase-visited { box-shadow: inset 3px 0 0 rgba(105,240,174,.56); }
+
+    @keyframes followLedPanel {
+      0%, 100% { box-shadow: 0 24px 70px rgba(0,0,0,.34), 0 0 0 rgba(248,199,108,0); }
+      50% { box-shadow: 0 24px 70px rgba(0,0,0,.34), 0 0 24px rgba(248,199,108,.18); }
+    }
+    @keyframes followLedOrbit {
+      to { transform: rotate(1turn); }
+    }
+    @keyframes followLedStrip {
+      0%, 100% { opacity: .45; filter: brightness(.9); }
+      50% { opacity: 1; filter: brightness(1.45); }
+    }
+
+    .tag {
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 9px;
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(66,232,212,.12);
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .tag.gold { background: rgba(248,199,108,.14); color: var(--gold); }
+    .tag.blue { background: rgba(122,167,255,.14); color: var(--blue); }
+    .tag.green { background: rgba(105,240,174,.12); color: var(--green); }
+    .tag.red { background: rgba(255,111,145,.12); color: var(--red); }
+    .tag.grey { background: rgba(154,163,180,.11); color: #b5bfd1; }
+
+    .due { color: var(--gold); font-weight: 900; }
+    .copy-inline { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .empty {
+      padding: 34px 16px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed rgba(255,255,255,.14);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .note {
+      color: var(--faint);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .split {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .timer-box {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+    }
+    .timer-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 8px;
+    }
+    .timer-box strong { display: block; line-height: 1.35; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      place-items: center;
+      padding: 22px;
+      background: rgba(0,0,0,.72);
+    }
+    .modal.open { display: grid; }
+    .modal .modal-card {
+      width: min(960px, 96vw);
+      max-height: 90vh;
+      overflow: auto;
+      border-radius: 18px;
+      background: #0d1220;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 980px) {
+      .topbar, .mission { align-items: flex-start; flex-direction: column; }
+      .metrics, .workspace-grid, .template-grid { grid-template-columns: 1fr; }
+      .lead-list { max-height: unset; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100vw - 22px, 1280px); }
+      .row, .timer-grid { grid-template-columns: 1fr; }
+      .tabs { width: 100%; }
+      .tab-btn, .mode-btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">SF</div>
+        <div>
+          <h1>Shoplot Follow-up Desk</h1>
+          <p class="subtitle">Copy-first workflow for asking, checking the business page, and setting the site visit without thinking too much.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="importBtn" type="button">Import Backup</button>
+        <button class="btn" id="exportBtn" type="button">Export Backup</button>
+        <button class="btn danger" id="clearBtn" type="button">Clear All</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <section class="grid metrics">
+      <article class="card metric"><span>Total Leads</span><strong id="metricTotal">0</strong></article>
+      <article class="card metric progress-led" id="askVerifyCard"><span class="led-mask"></span><span>Ask / Verify</span><strong id="metricReply">0</strong></article>
+      <article class="card metric progress-led" id="siteVisitCard"><span class="led-mask"></span><span>Site Visit</span><strong id="metricVisit">0</strong></article>
+      <article class="card metric progress-led" id="decisionCard"><span class="led-mask"></span><span>Decision Pending</span><strong id="metricDecision">0</strong></article>
+    </section>
+
+    <section class="card mission">
+      <div>
+        <h2>Next Move</h2>
+        <p id="missionText">Create or select a lead, then the next message will be ready to copy.</p>
+      </div>
+      <button class="mission-action" id="copyNextBtn" type="button">
+        <span>Copy Next</span>
+        <strong id="copyNextLabel">Select lead</strong>
+      </button>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" type="button" data-tab="leads">Leads</button>
+      <button class="tab-btn" type="button" data-tab="templates">Templates</button>
+    </div>
+
+    <main>
+      <section class="tab-panel active" id="leadsPanel">
+        <div class="workspace-grid">
+          <aside class="split">
+            <section class="card">
+              <div class="panel-head">
+                <h2>Lead Editor</h2>
+                <p>Keep the record minimal. The message buttons below already know what to do.</p>
+              </div>
+              <div class="panel-body">
+                <div class="stack">
+                  <div class="row">
+                    <label>Lead Name
+                      <input id="nameInput" placeholder="Contact name">
+                    </label>
+                    <label>Phone
+                      <input id="phoneInput" placeholder="+60...">
+                    </label>
+                  </div>
+                  <div class="row">
+                    <label>Branch Location
+                      <input id="branchInput" placeholder="Ipoh, Perak">
+                    </label>
+                    <label>Business Page
+                      <input id="pageInput" placeholder="Facebook page or handle">
+                    </label>
+                  </div>
+                  <div class="row">
+                    <label>SSM Number
+                      <input id="ssmInput" placeholder="SSM / registration no.">
+                    </label>
+                    <label>Phase
+                      <select id="phaseInput">
+                        <option value="ask">Ask info</option>
+                        <option value="verify">Verify business page</option>
+                        <option value="schedule">Schedule visit</option>
+                        <option value="visited">Visited, deciding</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="row">
+                    <label>Decision
+                      <select id="decisionInput">
+                        <option value="pending">Pending</option>
+                        <option value="proceed">Proceed</option>
+                        <option value="more-time">Need more time</option>
+                        <option value="no-go">Not continuing</option>
+                      </select>
+                    </label>
+                    <label>Entry Date
+                      <input id="entryDateInput" type="date">
+                    </label>
+                  </div>
+                  <div class="row">
+                    <label>Availability Reason
+                      <input id="availabilityInput" placeholder="Saya sedang di KL sekarang">
+                    </label>
+                    <div></div>
+                  </div>
+                  <div class="timer-grid">
+                    <div class="timer-box">
+                      <span>Reply Due</span>
+                      <strong id="replyDueText">-</strong>
+                    </div>
+                    <div class="timer-box">
+                      <span>Visit Target</span>
+                      <strong id="visitDueText">-</strong>
+                    </div>
+                    <div class="timer-box">
+                      <span>Decision Window</span>
+                      <strong id="decisionWindowText">-</strong>
+                    </div>
+                  </div>
+                  <label>Notes
+                    <textarea id="notesInput" placeholder="Internal notes, follow-up details, decision notes..."></textarea>
+                  </label>
+                  <div class="actions">
+                    <button class="btn primary" id="saveBtn" type="button">Save Lead</button>
+                    <button class="btn" id="newBtn" type="button">New Lead</button>
+                    <button class="btn soft" id="parseBtn" type="button">Parse Raw Text</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="panel-head">
+                <h2>Paste Raw Text</h2>
+                <p>Optional. Paste a WhatsApp conversation and let the app pull out the obvious bits.</p>
+              </div>
+              <div class="panel-body">
+                <div class="stack">
+                  <label>Raw chat / notes
+                    <textarea id="rawInput" placeholder="Paste message here..."></textarea>
+                  </label>
+                  <div class="actions">
+                    <button class="btn" id="sampleBtn" type="button">Load Sample</button>
+                    <button class="btn warn" id="extractBtn" type="button">Extract to Lead</button>
+                    <button class="btn danger" id="clearRawBtn" type="button">Clear Raw</button>
+                  </div>
+                  <p class="note">This is text parsing only. If you later paste a screenshot, you can still add the result manually in the editor.</p>
+                </div>
+              </div>
+            </section>
+          </aside>
+
+          <section class="card">
+            <div class="panel-head">
+              <h2>Leads Table</h2>
+              <p>Tap a row to open it. The current lead stays highlighted.</p>
+            </div>
+            <div class="panel-body">
+              <div class="lead-tools">
+                <div class="row">
+                  <label>Search
+                    <input id="searchInput" placeholder="Name, phone, page, notes...">
+                  </label>
+                  <label>Filter
+                    <select id="filterInput">
+                      <option value="all">All leads</option>
+                      <option value="ask">Ask info</option>
+                      <option value="verify">Verify business page</option>
+                      <option value="schedule">Schedule visit</option>
+                      <option value="visited">Visited, deciding</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="lead-list">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Lead</th>
+                        <th>Phase</th>
+                        <th>Decision</th>
+                        <th>Entry</th>
+                        <th>Reply Due</th>
+                        <th>Visit Target</th>
+                        <th>Branch</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="leadBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="templatesPanel">
+        <div class="template-grid">
+          <section class="card template-card" id="askTemplateCard">
+            <h3>1. Asking template</h3>
+            <p>Use this after they say hi or ask whether it is available.</p>
+            <div class="copy-box" id="askPreview"></div>
+            <div class="copy-inline">
+              <button class="btn primary" id="copyAskBtn" type="button">Copy Ask</button>
+            </div>
+          </section>
+
+          <section class="card template-card" id="verifyTemplateCard">
+            <h3>2. Business page check</h3>
+            <p>Use this after they fill in the details and you want to verify the business page.</p>
+            <div class="copy-box" id="verifyPreview"></div>
+            <div class="copy-inline">
+              <button class="btn primary" id="copyVerifyBtn" type="button">Copy Verify</button>
+            </div>
+          </section>
+
+          <section class="card template-card" id="scheduleTemplateCard">
+            <h3>3. Schedule visit</h3>
+            <p>Use this after confirmation, especially when you are in KL and want to avoid going back for nothing.</p>
+            <div class="copy-box" id="schedulePreview"></div>
+            <div class="copy-inline">
+              <button class="btn primary" id="copyScheduleBtn" type="button">Copy Schedule</button>
+            </div>
+          </section>
+
+          <section class="card template-card" id="decisionTemplateCard">
+            <h3>4. Visit decision</h3>
+            <p>Not a copy message. This is your post-visit decision state.</p>
+            <div class="copy-box" id="decisionPreview"></div>
+            <div class="copy-inline">
+              <button class="btn soft" id="markVisitedBtn" type="button">Mark Visited</button>
+              <button class="btn warn" id="decisionClearBtn" type="button">Reset Decision</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="imageModal">
+    <div class="modal-card">
+      <img id="modalImage" alt="Preview" style="display:block;width:100%;height:auto;">
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "shoplot_followup_desk_v1";
+
+    const SAMPLE_TEXT = `Hi, saya Adi.
+Saya nak buka kedai servis motor.
+SSM: 202601234567
+FB: https://facebook.com/adi.motor`;
+
+    const ASK_TEMPLATE = `Hi, Selamat Pagi, ini available ya.
+
+Jika boleh, sila beritahu berikut:
+
+1. Tujuan Penyewaan: (Contoh: Untuk menjalankan kafe kopi)
+2. Jenis Perniagaan: (Contoh: Kafe, Klinik, Pusat Tuisyen, dll.)
+3. Number SSM: (Untuk tujuan pengesahan)
+4. Page Business(jika ada)
+
+
+Terima Kasih.`;
+
+    const state = {
+      leads: [],
+      activeId: null,
+      search: "",
+      filter: "all",
+      tab: "leads"
+    };
+
+    const els = {
+      metricTotal: document.getElementById("metricTotal"),
+      metricReply: document.getElementById("metricReply"),
+      metricVisit: document.getElementById("metricVisit"),
+      metricDecision: document.getElementById("metricDecision"),
+      missionText: document.getElementById("missionText"),
+      copyNextLabel: document.getElementById("copyNextLabel"),
+      copyNextBtn: document.getElementById("copyNextBtn"),
+      importBtn: document.getElementById("importBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      clearBtn: document.getElementById("clearBtn"),
+      importFile: document.getElementById("importFile"),
+      nameInput: document.getElementById("nameInput"),
+      phoneInput: document.getElementById("phoneInput"),
+      branchInput: document.getElementById("branchInput"),
+      pageInput: document.getElementById("pageInput"),
+      ssmInput: document.getElementById("ssmInput"),
+      phaseInput: document.getElementById("phaseInput"),
+      decisionInput: document.getElementById("decisionInput"),
+      entryDateInput: document.getElementById("entryDateInput"),
+      availabilityInput: document.getElementById("availabilityInput"),
+      replyDueText: document.getElementById("replyDueText"),
+      visitDueText: document.getElementById("visitDueText"),
+      decisionWindowText: document.getElementById("decisionWindowText"),
+      notesInput: document.getElementById("notesInput"),
+      rawInput: document.getElementById("rawInput"),
+      searchInput: document.getElementById("searchInput"),
+      filterInput: document.getElementById("filterInput"),
+      leadBody: document.getElementById("leadBody"),
+      askPreview: document.getElementById("askPreview"),
+      verifyPreview: document.getElementById("verifyPreview"),
+      schedulePreview: document.getElementById("schedulePreview"),
+      decisionPreview: document.getElementById("decisionPreview"),
+      copyAskBtn: document.getElementById("copyAskBtn"),
+      copyVerifyBtn: document.getElementById("copyVerifyBtn"),
+      copyScheduleBtn: document.getElementById("copyScheduleBtn"),
+      markVisitedBtn: document.getElementById("markVisitedBtn"),
+      decisionClearBtn: document.getElementById("decisionClearBtn"),
+      sampleBtn: document.getElementById("sampleBtn"),
+      extractBtn: document.getElementById("extractBtn"),
+      clearRawBtn: document.getElementById("clearRawBtn"),
+      saveBtn: document.getElementById("saveBtn"),
+      newBtn: document.getElementById("newBtn"),
+      parseBtn: document.getElementById("parseBtn"),
+      imageModal: document.getElementById("imageModal"),
+      modalImage: document.getElementById("modalImage")
+    };
+
+    function uid() {
+      return Date.now() + Math.floor(Math.random() * 1000);
+    }
+
+    function nowIso() {
+      return new Date().toISOString();
+    }
+
+    function safeDate(value, fallback = nowIso()) {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? fallback : date.toISOString();
+    }
+
+    function pad2(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function localDateString(date) {
+      return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+    }
+
+    function toDateInput(value) {
+      if (!value) return "";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return localDateString(date);
+    }
+
+    function plusDays(dateValue, days) {
+      const source = toDateInput(dateValue) || localDateString(new Date());
+      const date = new Date(`${source}T12:00:00`);
+      date.setDate(date.getDate() + days);
+      return localDateString(date);
+    }
+
+    function fmt(value) {
+      if (!value) return "-";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+      return new Intl.DateTimeFormat("en-MY", { dateStyle: "medium", timeStyle: "short" }).format(date);
+    }
+
+    function shortDate(value) {
+      if (!value) return "-";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+      return new Intl.DateTimeFormat("en-MY", { month: "short", day: "2-digit" }).format(date);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function normalizeLead(lead) {
+      const createdAt = safeDate(lead.createdAt || lead.updatedAt || nowIso());
+      const entryDate = toDateInput(lead.entryDate || createdAt || nowIso()) || localDateString(new Date(createdAt));
+      const replyDueAt = plusDays(entryDate, 2);
+      const visitDueAt = plusDays(replyDueAt, 7);
+      return {
+        id: lead.id || uid(),
+        createdAt,
+        updatedAt: safeDate(lead.updatedAt || createdAt, createdAt),
+        entryDate,
+        name: lead.name || "",
+        phone: lead.phone || "",
+        branchLocation: lead.branchLocation || "Ipoh, Perak",
+        businessPage: lead.businessPage || "",
+        ssmNumber: lead.ssmNumber || "",
+        availabilityNote: lead.availabilityNote || "Saya sedang di KL sekarang",
+        phase: lead.phase || "ask",
+        decision: lead.decision || "pending",
+        replyDueAt,
+        visitDueAt,
+        notes: lead.notes || "",
+        rawText: lead.rawText || ""
+      };
+    }
+
+    function sampleLead() {
+      const createdAt = nowIso();
+      return normalizeLead({
+        id: uid(),
+        createdAt,
+        updatedAt: createdAt,
+        entryDate: createdAt,
+        name: "Aiman",
+        phone: "+60 11-6264 9073",
+        branchLocation: "Ipoh, Perak",
+        businessPage: "facebook.com/aiman.motor",
+        ssmNumber: "202601234567",
+        availabilityNote: "Saya sedang di KL sekarang",
+        phase: "ask",
+        decision: "pending",
+        notes: "Example lead"
+      });
+    }
+
+    function loadState() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      state.leads = stored ? JSON.parse(stored).map(normalizeLead) : [];
+      state.activeId = state.leads[0]?.id || null;
+      syncEditorFromActive();
+      renderAll();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.leads));
+      renderAll();
+    }
+
+    function activeLead() {
+      return state.leads.find(lead => String(lead.id) === String(state.activeId)) || null;
+    }
+
+    function setActiveLead(id) {
+      state.activeId = id;
+      syncEditorFromActive();
+      renderAll();
+    }
+
+    function createLead(partial = {}) {
+      const lead = normalizeLead({
+        id: uid(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+        ...partial
+      });
+      state.leads.unshift(lead);
+      state.activeId = lead.id;
+      saveState();
+      syncEditorFromActive();
+    }
+
+    function updateLead(id, patch) {
+      const index = state.leads.findIndex(lead => String(lead.id) === String(id));
+      if (index === -1) return;
+      const updated = normalizeLead({
+        ...state.leads[index],
+        ...patch,
+        updatedAt: nowIso()
+      });
+      state.leads[index] = updated;
+      saveState();
+      if (String(state.activeId) === String(id)) syncEditorFromActive();
+    }
+
+    function deleteLead(id) {
+      state.leads = state.leads.filter(lead => String(lead.id) !== String(id));
+      if (!state.leads.length) {
+        state.activeId = null;
+      } else if (String(state.activeId) === String(id)) {
+        state.activeId = state.leads[0].id;
+      }
+      saveState();
+      syncEditorFromActive();
+    }
+
+    function copyText(text) {
+      return navigator.clipboard.writeText(text).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      });
+    }
+
+    function askTemplate() {
+      return ASK_TEMPLATE;
+    }
+
+    function verifyTemplate(lead) {
+      const loc = lead.branchLocation || "Ipoh, Perak";
+      return `Hi, Saya Ingin Bertanya Mengenai bukti cawangan ${loc}.
+
+Nak tanya dua perkara sahaja untuk pengesahan:
+1.) Adakah orang ini seorang staff anda? (screenshot attached)
+2.) Betul ke anda ada plan untuk buka cawangan di ${loc}?
+
+Untuk pengesahan sahaja. Terima kasih.`;
+    }
+
+    function scheduleTemplate(lead) {
+      const reason = lead.availabilityNote || "Saya sedang di KL sekarang";
+      return `Hi, ${reason}.
+
+Kalau masih serious dan semua dah confirm, saya cadang kita set site visit untuk minggu depan.
+Sementara itu saya share photo/video dulu supaya senang buat keputusan awal.
+
+Terima kasih.`;
+    }
+
+    function decisionTemplate(lead) {
+      const decision = lead.decision || "pending";
+      const text = {
+        pending: "Decision pending selepas site visit.",
+        proceed: "Saya rasa boleh proceed selepas tengok site.",
+        "more-time": "Saya perlukan sedikit masa untuk semak semula.",
+        "no-go": "Saya decide untuk tak proceed dulu."
+      }[decision] || "Decision pending selepas site visit.";
+      return `Post-visit note: ${text}`;
+    }
+
+    function copyNextMessage(lead = activeLead()) {
+      if (!lead) return;
+      if (lead.phase === "ask") return copyText(askTemplate());
+      if (lead.phase === "verify") return copyText(verifyTemplate(lead));
+      if (lead.phase === "schedule") return copyText(scheduleTemplate(lead));
+      return;
+    }
+
+    function nextCopyLabel(lead) {
+      if (!lead) return "Select lead";
+      if (lead.phase === "ask") return "Copy Ask";
+      if (lead.phase === "verify") return "Copy Verify";
+      if (lead.phase === "schedule") return "Copy Visit";
+      return "Review";
+    }
+
+    function missionTextFor(lead) {
+      if (!lead) return "Create or select a lead, then the next message will be ready to copy.";
+      if (lead.phase === "ask") return "Send the asking template, collect the details, then move to business page verification.";
+      if (lead.phase === "verify") return "Use the business page check before you talk about site visit.";
+      if (lead.phase === "schedule") return "Book next week's visit only when they are serious and the page checks out.";
+      return "After the visit, decide whether to proceed or stop.";
+    }
+
+    function parseRawText(text) {
+      const phone = text.match(/\+60[\s-]?\d{1,4}[\s-]?\d{3,4}[\s-]?\d{3,4}/)?.[0] || "";
+      const ssm = text.match(/\b(\d{12,15})\b/)?.[1] || "";
+      const page = text.match(/https?:\/\/[^\s]+facebook[^\s]*/i)?.[0] || text.match(/facebook\.com\/[^\s]+/i)?.[0] || "";
+      const name = text.match(/(?:saya|nama saya|i am|i'm)\s+([A-Za-z][A-Za-z .'-]{1,40})/i)?.[1] || "";
+      return { phone, ssmNumber: ssm, businessPage: page, name };
+    }
+
+    function syncEditorFromActive() {
+      const lead = activeLead();
+      const v = (el, value) => { el.value = value || ""; };
+      if (!lead) {
+        v(els.nameInput, "");
+        v(els.phoneInput, "");
+        v(els.branchInput, "Ipoh, Perak");
+        v(els.pageInput, "");
+        v(els.ssmInput, "");
+        v(els.phaseInput, "ask");
+        v(els.decisionInput, "pending");
+        v(els.entryDateInput, toDateInput(nowIso()));
+        v(els.availabilityInput, "Saya sedang di KL sekarang");
+        v(els.replyDueText, "-");
+        v(els.visitDueText, "-");
+        v(els.decisionWindowText, "-");
+        v(els.notesInput, "");
+        return;
+      }
+      v(els.nameInput, lead.name);
+      v(els.phoneInput, lead.phone);
+      v(els.branchInput, lead.branchLocation);
+      v(els.pageInput, lead.businessPage);
+      v(els.ssmInput, lead.ssmNumber);
+      v(els.phaseInput, lead.phase);
+      v(els.decisionInput, lead.decision);
+      v(els.entryDateInput, toDateInput(lead.entryDate || lead.createdAt));
+      v(els.availabilityInput, lead.availabilityNote);
+      v(els.replyDueText, fmt(lead.replyDueAt));
+      v(els.visitDueText, fmt(lead.visitDueAt));
+      v(els.decisionWindowText, `Entry + 2 days + 1 week`);
+      v(els.notesInput, lead.notes);
+    }
+
+    function currentEditorData() {
+      const entryDate = els.entryDateInput.value || localDateString(new Date());
+      return normalizeLead({
+        id: activeLead()?.id || uid(),
+        createdAt: activeLead()?.createdAt || nowIso(),
+        updatedAt: nowIso(),
+        entryDate,
+        name: els.nameInput.value.trim(),
+        phone: els.phoneInput.value.trim(),
+        branchLocation: els.branchInput.value.trim() || "Ipoh, Perak",
+        businessPage: els.pageInput.value.trim(),
+        ssmNumber: els.ssmInput.value.trim(),
+        phase: els.phaseInput.value,
+        decision: els.decisionInput.value,
+        availabilityNote: els.availabilityInput.value.trim() || "Saya sedang di KL sekarang",
+        notes: els.notesInput.value.trim(),
+        rawText: activeLead()?.rawText || ""
+      });
+    }
+
+    function saveEditor() {
+      const lead = activeLead();
+      const data = currentEditorData();
+      if (!lead) {
+        state.leads.unshift(data);
+        state.activeId = data.id;
+      } else {
+        updateLead(lead.id, data);
+        return;
+      }
+      saveState();
+      syncEditorFromActive();
+    }
+
+    function renderMetrics() {
+      els.metricTotal.textContent = String(state.leads.length);
+      els.metricReply.textContent = String(state.leads.filter(lead => lead.phase === "ask" || lead.phase === "verify").length);
+      els.metricVisit.textContent = String(state.leads.filter(lead => lead.phase === "schedule").length);
+      els.metricDecision.textContent = String(state.leads.filter(lead => lead.phase === "visited" && lead.decision === "pending").length);
+
+      const lead = activeLead();
+      document.getElementById("askVerifyCard")?.classList.toggle("active", !!lead && (lead.phase === "ask" || lead.phase === "verify"));
+      document.getElementById("siteVisitCard")?.classList.toggle("active", !!lead && lead.phase === "schedule");
+      document.getElementById("decisionCard")?.classList.toggle("active", !!lead && lead.phase === "visited");
+    }
+
+    function renderMission() {
+      const lead = activeLead();
+      els.missionText.textContent = missionTextFor(lead);
+      els.copyNextLabel.textContent = nextCopyLabel(lead);
+      els.copyNextBtn.disabled = !lead || lead.phase === "visited";
+      els.copyNextBtn.classList.remove("active");
+    }
+
+    function phaseClass(phase) {
+      return `phase-${phase}`;
+    }
+
+    function phaseTag(phase) {
+      const map = {
+        ask: `<span class="tag gold">Ask</span>`,
+        verify: `<span class="tag blue">Verify</span>`,
+        schedule: `<span class="tag">Schedule</span>`,
+        visited: `<span class="tag green">Visited</span>`
+      };
+      return map[phase] || `<span class="tag grey">Ask</span>`;
+    }
+
+    function decisionTag(decision) {
+      const map = {
+        pending: `<span class="tag grey">Pending</span>`,
+        proceed: `<span class="tag green">Proceed</span>`,
+        "more-time": `<span class="tag blue">More time</span>`,
+        "no-go": `<span class="tag red">No go</span>`
+      };
+      return map[decision] || `<span class="tag grey">Pending</span>`;
+    }
+
+    function filteredLeads() {
+      return state.leads.filter(lead => {
+        const term = state.search.trim().toLowerCase();
+        const haystack = [
+          lead.name,
+          lead.phone,
+          lead.branchLocation,
+          lead.businessPage,
+          lead.ssmNumber,
+          lead.availabilityNote,
+          lead.notes,
+          lead.phase,
+          lead.decision,
+          lead.entryDate
+        ].join(" ").toLowerCase();
+        const searchMatch = !term || haystack.includes(term);
+        const filterMatch = state.filter === "all" || lead.phase === state.filter;
+        return searchMatch && filterMatch;
+      });
+    }
+
+    function renderLeads() {
+      const list = filteredLeads();
+      if (!list.length) {
+        els.leadBody.innerHTML = `<tr><td colspan="8"><div class="empty">No lead records yet. Use <strong>New Lead</strong> or paste raw text and extract it.</div></td></tr>`;
+        return;
+      }
+      els.leadBody.innerHTML = list.map(lead => `
+        <tr class="${phaseClass(lead.phase)} ${String(lead.id) === String(state.activeId) ? "active-row" : ""}" data-id="${lead.id}">
+          <td>
+            <strong>${escapeHtml(lead.name || "Untitled")}</strong><br>
+            <span style="color:var(--muted)">${escapeHtml(lead.phone || "-")}</span>
+          </td>
+          <td>${phaseTag(lead.phase)}</td>
+          <td>${decisionTag(lead.decision)}</td>
+          <td>${escapeHtml(shortDate(lead.entryDate))}</td>
+          <td class="${new Date(lead.replyDueAt).getTime() <= Date.now() ? "due" : ""}">${escapeHtml(shortDate(lead.replyDueAt))}</td>
+          <td>${escapeHtml(shortDate(lead.visitDueAt))}</td>
+          <td>${escapeHtml(lead.branchLocation || "-")}</td>
+          <td>
+            <div class="copy-inline">
+              <button class="small-btn" data-view="${lead.id}">View</button>
+              <button class="small-btn" data-copy="${lead.id}">Copy Next</button>
+              <button class="small-btn" data-del="${lead.id}">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      els.leadBody.querySelectorAll("[data-view]").forEach(btn => {
+        btn.addEventListener("click", () => setActiveLead(btn.getAttribute("data-view")));
+      });
+      els.leadBody.querySelectorAll("[data-copy]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lead = state.leads.find(item => String(item.id) === String(btn.getAttribute("data-copy")));
+          if (lead) copyNextMessage(lead);
+        });
+      });
+      els.leadBody.querySelectorAll("[data-del]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const ok = confirm("Delete this lead permanently?");
+          if (ok) deleteLead(btn.getAttribute("data-del"));
+        });
+      });
+      els.leadBody.querySelectorAll("tr[data-id]").forEach(row => {
+        row.addEventListener("click", event => {
+          if (event.target.closest("button")) return;
+          setActiveLead(row.getAttribute("data-id"));
+        });
+      });
+    }
+
+    function renderTemplates() {
+      const lead = activeLead() || currentEditorData();
+      els.askPreview.textContent = askTemplate();
+      els.verifyPreview.textContent = verifyTemplate(lead);
+      els.schedulePreview.textContent = scheduleTemplate(lead);
+      els.decisionPreview.textContent = decisionTemplate(lead);
+    }
+
+    function renderAll() {
+      renderMetrics();
+      renderMission();
+      renderLeads();
+      renderTemplates();
+    }
+
+    function setTab(tab) {
+      state.tab = tab;
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tab);
+      });
+      document.getElementById("leadsPanel").classList.toggle("active", tab === "leads");
+      document.getElementById("templatesPanel").classList.toggle("active", tab === "templates");
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => setTab(btn.dataset.tab));
+    });
+
+    els.copyNextBtn.addEventListener("click", () => copyNextMessage());
+    els.copyAskBtn.addEventListener("click", () => copyText(askTemplate()));
+    els.copyVerifyBtn.addEventListener("click", () => copyText(verifyTemplate(activeLead() || currentEditorData())));
+    els.copyScheduleBtn.addEventListener("click", () => copyText(scheduleTemplate(activeLead() || currentEditorData())));
+    els.markVisitedBtn.addEventListener("click", () => {
+      const lead = activeLead();
+      if (!lead) return;
+      updateLead(lead.id, { phase: "visited", decision: "pending" });
+    });
+    els.decisionClearBtn.addEventListener("click", () => {
+      const lead = activeLead();
+      if (!lead) return;
+      updateLead(lead.id, { decision: "pending" });
+    });
+
+    els.sampleBtn.addEventListener("click", () => {
+      els.rawInput.value = SAMPLE_TEXT;
+    });
+    els.clearRawBtn.addEventListener("click", () => {
+      els.rawInput.value = "";
+      els.rawInput.focus();
+    });
+    els.extractBtn.addEventListener("click", () => {
+      const text = els.rawInput.value.trim();
+      if (!text) {
+        alert("Paste text first.");
+        return;
+      }
+      const parsed = parseRawText(text);
+      createLead({
+        ...parsed,
+        rawText: text,
+        availabilityNote: els.availabilityInput.value.trim() || "Saya sedang di KL sekarang",
+        branchLocation: els.branchInput.value.trim() || "Ipoh, Perak",
+        phase: "ask",
+        decision: "pending",
+        entryDate: localDateString(new Date())
+      });
+      els.rawInput.value = "";
+    });
+    els.parseBtn.addEventListener("click", () => {
+      const text = els.rawInput.value.trim();
+      if (!text) return alert("Paste text first.");
+      const parsed = parseRawText(text);
+      if (parsed.name) els.nameInput.value = parsed.name;
+      if (parsed.phone) els.phoneInput.value = parsed.phone;
+      if (parsed.ssmNumber) els.ssmInput.value = parsed.ssmNumber;
+      if (parsed.businessPage) els.pageInput.value = parsed.businessPage;
+    });
+
+    [els.nameInput, els.phoneInput, els.branchInput, els.pageInput, els.ssmInput, els.phaseInput, els.decisionInput, els.entryDateInput, els.availabilityInput, els.notesInput].forEach(el => {
+      el.addEventListener("change", saveEditor);
+    });
+
+    els.searchInput.addEventListener("input", () => {
+      state.search = els.searchInput.value;
+      renderLeads();
+    });
+    els.filterInput.addEventListener("change", () => {
+      state.filter = els.filterInput.value;
+      renderLeads();
+    });
+
+    els.saveBtn.addEventListener("click", saveEditor);
+    els.newBtn.addEventListener("click", () => {
+      createLead();
+      setTab("leads");
+    });
+
+    els.exportBtn.addEventListener("click", () => {
+      const payload = {
+        version: 1,
+        exportedAt: nowIso(),
+        leads: state.leads
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `shoplot-followup-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    els.importBtn.addEventListener("click", () => els.importFile.click());
+    els.importFile.addEventListener("change", async () => {
+      const file = els.importFile.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        alert("Invalid JSON file.");
+        els.importFile.value = "";
+        return;
+      }
+      const incoming = Array.isArray(parsed) ? parsed : parsed?.leads;
+      if (!Array.isArray(incoming)) {
+        alert("No lead data found.");
+        els.importFile.value = "";
+        return;
+      }
+      const ok = confirm("Replace current data with imported backup?");
+      if (!ok) {
+        els.importFile.value = "";
+        return;
+      }
+      state.leads = incoming.map(normalizeLead);
+      state.activeId = state.leads[0]?.id || null;
+      saveState();
+      syncEditorFromActive();
+      els.importFile.value = "";
+    });
+
+    els.clearBtn.addEventListener("click", () => {
+      const ok = confirm("Clear all leads permanently?");
+      if (!ok) return;
+      state.leads = [];
+      state.activeId = null;
+      localStorage.removeItem(STORAGE_KEY);
+      syncEditorFromActive();
+      renderAll();
+    });
+
+    els.imageModal.addEventListener("click", () => {
+      els.imageModal.classList.remove("open");
+    });
+
+    loadState();
+    setTab("leads");
+  </script>
+</body>
+</html>
